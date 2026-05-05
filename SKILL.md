@@ -1,6 +1,21 @@
 ---
 name: modelscope-api
+slug: modelscope-api
+version: 1.0.0
+author: Chenghd511
+license: MIT
 description: 魔塔社区（ModelScope）完整 API 封装。支持模型/数据集/技能中心/MCP广场/创空间（Studio）的查询、搜索、部署与管理。当用户需要查询魔塔模型、下载数据集、搜索MCP服务器、安装技能、部署创空间、管理Studio、或访问魔塔社区任何 API 时使用。触发词：「魔塔」「ModelScope」「查模型」「搜MCP」「技能中心」「魔塔下载」「创空间」「Studio部署」「魔搭部署」。
+triggers:
+  - 魔塔
+  - ModelScope
+  - 查模型
+  - 搜MCP
+  - 技能中心
+  - 魔塔下载
+  - 创空间
+  - Studio部署
+  - 魔搭部署
+  - modelscope
 ---
 
 # 魔塔社区（ModelScope）API 完整手册

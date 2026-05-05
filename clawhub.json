@@ -1,5 +1,6 @@
 {
   "name": "ModelScope API Skill",
+  "slug": "modelscope-api",
   "tagline": "魔塔社区完整API封装：模型/数据集/技能/MCP广场/创空间",
   "description": "封装魔塔社区（ModelScope）全部可用API，覆盖技能中心(8万+)、MCP广场(9400+)、模型库(19万+)、数据集、创空间(Studio)五大能力模块。支持搜索、下载、部署、管理，含Python SDK和CLI辅助工具。",
   "category": "development",
