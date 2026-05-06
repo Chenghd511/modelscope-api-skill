@@ -5,8 +5,8 @@
   "description": "封装魔塔社区（ModelScope）全部可用API，覆盖技能中心(8万+)、MCP广场(9400+)、模型库(19万+)、数据集、创空间(Studio)五大能力模块。支持搜索、下载、部署、管理，含Python SDK和CLI辅助工具。",
   "category": "development",
   "tags": ["modelscope", "mcp", "ai-models", "dataset", "skills", "studio", "deploy", "chinese-ai"],
-  "version": "1.0.0",
-  "license": "MIT",
+  "version": "1.0.2",
+  "license": "Apache-2.0",
   "pricing": "free",
   "support_url": "https://github.com/Chenghd511/modelscope-api-skill/issues",
   "homepage": "https://github.com/Chenghd511/modelscope-api-skill"

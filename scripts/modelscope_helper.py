@@ -45,7 +45,7 @@ def guide_registration():
   1. 打开 https://www.modelscope.cn/my/overview
   2. 用手机号 / 支付宝 / 钉钉 完成注册登录
   3. 登录后点右上角头像 →「访问令牌 (Access Token)」
-  4. 点「新建令牌」，名称填 workbuddy，权限选「全部」
+  4. 点「新建令牌」，名称填 workbuddy，权限选「只读」或「下载」
   5. 复制生成的 Token（格式：ms-xxxxxxxx）
      ⚠️  Token 只显示一次，务必保存！
 

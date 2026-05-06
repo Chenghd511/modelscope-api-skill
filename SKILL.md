@@ -1,12 +1,14 @@
 ---
 name: modelscope-api
 slug: modelscope-api
-version: 1.0.0
+version: 1.0.2
 author: Chenghd511
-license: MIT
-description: 魔塔社区（ModelScope）完整 API 封装。支持模型/数据集/技能中心/MCP广场/创空间（Studio）的查询、搜索、部署与管理。当用户需要查询魔塔模型、下载数据集、搜索MCP服务器、安装技能、部署创空间、管理Studio、或访问魔塔社区任何 API 时使用。触发词：「魔塔」「ModelScope」「查模型」「搜MCP」「技能中心」「魔塔下载」「创空间」「Studio部署」「魔搭部署」。
+license: MIT-0
+description: 魔塔社区（ModelScope）完整 API 封装。支持模型/数据集/技能中心/MCP广场/创空间（Studio）的查询、搜索、部署与管理。当用户需要查询魔塔模型、下载数据集、搜索MCP服务器、安装技能、部署创空间、管理Studio、或访问魔塔社区任何 API 时使用。触发词：「魔塔」「mota」「使用mota」「ModelScope」「查模型」「搜MCP」「技能中心」「魔塔下载」「创空间」「Studio部署」「魔搭部署」。
 triggers:
   - 魔塔
+  - mota
+  - 使用mota
   - ModelScope
   - 查模型
   - 搜MCP
@@ -32,14 +34,34 @@ triggers:
 
 ## 第一步：Token 设置（首次使用必读）
 
+> ⚠️ **安全警告**：此技能包含只读操作和变更操作。**部署、删除、安装等变更操作需要你明确确认**。请使用最小必要权限的 Token。
+
+### 权限建议
+
+| 操作类型 | 所需权限 | 说明 |
+|---------|---------|------|
+| **只读操作**（搜索、查询） | 读取权限 | 无需 Token，公开可用 |
+| **下载操作**（模型、数据集） | 下载权限 | 需要 Token |
+| **变更操作**（创建、部署、删除） | 写入权限 | **必须明确用户确认** |
+
+> 💡 **建议**：优先使用只读 Token，仅在需要下载/部署时才提供写入权限。
+
 ### 情况 A：已有 Token
 
-设置环境变量或在每次请求加 Header：
+**推荐方式**：设置环境变量
 ```bash
 export MODELSCOPE_API_TOKEN="ms-xxxxxx"
 ```
 
-请求头格式：`Authorization: Bearer {token}`
+> ⚠️ **不要在聊天中粘贴完整 Token**，优先使用环境变量方式。
+
+**辅助脚本方式**：运行 `python scripts/modelscope_helper.py setup --token ms-xxxxxx` 可将 Token 保存到 `~/.modelscope/token` 以便复用。
+
+> 🔒 **Token 存储说明**：辅助脚本默认会将 Token 写入 `~/.modelscope/token` 文件。如不希望持久化存储，请直接使用环境变量方式，或在使用后手动删除该文件：
+> ```bash
+> rm ~/.modelscope/token
+> rmdir ~/.modelscope 2>/dev/null
+> ```
 
 ### 情况 B：没有 Token → 引导注册
 
@@ -48,12 +70,13 @@ export MODELSCOPE_API_TOKEN="ms-xxxxxx"
 1. 打开注册页面：https://www.modelscope.cn/my/overview
 2. 用手机号/支付宝/钉钉完成注册登录
 3. 登录后，点右上角头像 → **「访问令牌」(Access Token)**
-4. 点「新建令牌」，填写名称（如 `workbuddy`），权限选「全部」
-5. 复制生成的 Token（格式：`ms-xxxxxx`），**只显示一次，务必保存**
+4. 点「新建令牌」，填写名称（如 `workbuddy`）
+5. ⚠️ **重要**：权限选择「**只读**」或「**下载**」，除非你需要部署功能，否则不要选「全部」
+6. 复制生成的 Token（格式：`ms-xxxxxx`），**只显示一次，务必保存**
 
-> ⚠️ Token 即密码，不要提交到 GitHub。建议写入 `~/.modelscope/token` 文件。
+> ⚠️ Token 即密码，不要提交到 GitHub 或在聊天中粘贴。使用环境变量方式配置。
 
-**获取 Token 后**，告诉 AI：「我的魔塔 Token 是 ms-xxxxxx」，AI 会帮你配置。
+**获取 Token 后**，配置环境变量告诉 AI：「请将我的魔塔 Token 配置为环境变量 `MODELSCOPE_API_TOKEN`」
 
 ---
 
@@ -116,12 +139,17 @@ curl -s "https://www.modelscope.cn/openapi/v1/skills/@Alipay/alipay-payment-inte
 
 ### 1.3 下载技能（需 Token）
 
+> 🔒 **下载操作**：需要 Token 权限，但不会修改账户数据。
+
 ```python
 from modelscope.hub.api import HubApi
 
 api = HubApi(token="ms-xxxxxx")
 skill_dir = api.download_skill(skill_id="@Alipay/alipay-payment-integration")
 print(f"技能已下载到: {skill_dir}")
+```
+
+> ⚠️ **安装到本地前，请确认该技能的来源和用途**。
 ```
 
 底层 API（一般不直接调用）：
@@ -353,23 +381,25 @@ curl -s "https://www.modelscope.cn/api/v1/datasets/{namespace}/{name}/repo/tree"
 
 > **前置条件**：需要 `MODELSCOPE_API_TOKEN`，获取方式见「第一步：Token 设置」。
 
+> ⚠️ **【重要】变更操作需要用户明确确认**：以下操作会创建、修改或删除资源，执行前必须获得用户确认。
+
 ### 5.1 MCP 工具（推荐）
 
 配置 ModelScope MCP 服务后，可直接调用以下工具：
 
-| 操作 | 工具 | 说明 |
-|-----|-----|------|
-| 获取用户信息 | `getCurrentUser` | 获取当前用户名，用于 `owner` 参数 |
-| 创建创空间 | `createStudio` | 需要 `owner`, `repo_name`, `sdk_type` 等 |
-| 获取创空间详情 | `getStudio` | 传入 `owner`, `repo_name` |
-| 更新设置 | `updateStudioSettings` | 修改 `sdk_type`, `private` 等配置 |
-| 部署（启动/重启） | `deployStudio` | 触发代码拉取和构建 |
-| 停止 | `stopStudio` | 停止运行中的创空间 |
-| 获取日志 | `getStudioLogs` | `log_type="run"` 或 `"build"` |
-| 环境变量列表 | `listStudioSecrets` | 查看已配置的环境变量 |
-| 添加环境变量 | `addStudioSecret` | Body: `{key, value}` |
-| 更新环境变量 | `updateStudioSecret` | Body: `{key, value}` |
-| 删除环境变量 | `deleteStudioSecret` | Body: `{key}` |
+| 操作类型 | 操作 | 工具 | 说明 |
+|---------|-----|-----|------|
+| 🔒 只读 | 获取用户信息 | `getCurrentUser` | 获取当前用户名 |
+| ⚠️ **变更** | 创建创空间 | `createStudio` | **需确认** - 在账户中创建新资源 |
+| 🔒 只读 | 获取创空间详情 | `getStudio` | 查看现有资源 |
+| ⚠️ **变更** | 更新设置 | `updateStudioSettings` | **需确认** - 修改配置 |
+| ⚠️ **变更** | 部署（启动/重启） | `deployStudio` | **需确认** - 触发构建和部署 |
+| ⚠️ **变更** | 停止 | `stopStudio` | **需确认** - 停止服务 |
+| 🔒 只读 | 获取日志 | `getStudioLogs` | 查看运行日志 |
+| 🔒 只读 | 环境变量列表 | `listStudioSecrets` | 查看变量（不含值） |
+| ⚠️ **变更** | 添加环境变量 | `addStudioSecret` | **需确认** - 添加新变量 |
+| ⚠️ **变更** | 更新环境变量 | `updateStudioSecret` | **需确认** - 修改变量 |
+| ⚠️ **变更** | 删除环境变量 | `deleteStudioSecret` | **需确认** - 删除变量 |
 
 ### 5.2 HTTP API（MCP 不可用时的备选）
 
@@ -377,26 +407,26 @@ curl -s "https://www.modelscope.cn/api/v1/datasets/{namespace}/{name}/repo/tree"
 
 #### MCP 服务管理（配置 MCP 前使用）
 
-| 操作 | 方法 | 端点 |
-|-----|-----|-----|
-| 查询 MCP 服务详情/部署链接 | GET | `/mcp/servers/{id}?get_operational_url=true` |
-| 部署 MCP 服务 | POST | `/mcp/servers/{id}/deploy` |
+| 操作类型 | 操作 | 方法 | 端点 |
+|---------|-----|------|------|
+| 🔒 只读 | 查询 MCP 服务详情 | GET | `/mcp/servers/{id}?get_operational_url=true` |
+| ⚠️ **变更** | 部署 MCP 服务 | POST | `/mcp/servers/{id}/deploy` **（需确认）** |
 
 #### 创空间操作
 
-| 操作 | 方法 | 端点 | Body |
-|-----|-----|-----|------|
-| 获取当前用户 | GET | `/users/me` | — |
-| 创建创空间 | POST | `/studios` | `{owner, repo_name, sdk_type, display_name, description, private, ...}` |
-| 获取创空间详情 | GET | `/studios/{owner}/{repo_name}` | — |
-| 更新创空间设置 | PATCH | `/studios/{owner}/{repo_name}/settings` | `{sdk_type, base_image, private, ...}` |
-| 部署创空间 | POST | `/studios/{owner}/{repo_name}/deploy` | — |
-| 停止创空间 | POST | `/studios/{owner}/{repo_name}/stop` | — |
-| 获取日志 | GET | `/studios/{owner}/{repo_name}/logs/{log_type}` | — |
-| 获取环境变量列表 | GET | `/studios/{owner}/{repo_name}/secrets` | — |
-| 添加环境变量 | POST | `/studios/{owner}/{repo_name}/secrets` | `{key, value}` |
-| 更新环境变量 | PUT | `/studios/{owner}/{repo_name}/secrets` | `{key, value}` |
-| 删除环境变量 | DELETE | `/studios/{owner}/{repo_name}/secrets` | `{key}` |
+| 操作类型 | 操作 | 方法 | 端点 | Body |
+|---------|-----|------|------|------|
+| 🔒 只读 | 获取当前用户 | GET | `/users/me` | — |
+| ⚠️ **变更** | 创建创空间 | POST | `/studios` | `{owner, repo_name, ...}` **（需确认）** |
+| 🔒 只读 | 获取创空间详情 | GET | `/studios/{owner}/{repo_name}` | — |
+| ⚠️ **变更** | 更新创空间设置 | PATCH | `/studios/{owner}/{repo_name}/settings` | **（需确认）** |
+| ⚠️ **变更** | 部署创空间 | POST | `/studios/{owner}/{repo_name}/deploy` | **（需确认）** |
+| ⚠️ **变更** | 停止创空间 | POST | `/studios/{owner}/{repo_name}/stop` | **（需确认）** |
+| 🔒 只读 | 获取日志 | GET | `/studios/{owner}/{repo_name}/logs/{log_type}` | — |
+| 🔒 只读 | 获取环境变量列表 | GET | `/studios/{owner}/{repo_name}/secrets` | — |
+| ⚠️ **变更** | 添加环境变量 | POST | `/studios/{owner}/{repo_name}/secrets` | **（需确认）** |
+| ⚠️ **变更** | 更新环境变量 | PUT | `/studios/{owner}/{repo_name}/secrets` | **（需确认）** |
+| ⚠️ **变更** | 删除环境变量 | DELETE | `/studios/{owner}/{repo_name}/secrets` | **（需确认）** |
 
 完整 OpenAPI 文档：https://modelscope.cn/.well-known/openapi.json
 

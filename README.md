@@ -98,4 +98,4 @@ result = mcp.list_mcp_servers(search="高德")
 
 ## License
 
-MIT
+Apache-2.0
